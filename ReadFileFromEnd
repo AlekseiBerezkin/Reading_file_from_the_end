@@ -1,0 +1,67 @@
+using System.IO;
+using System.Linq;
+using System.Text;
+
+
+
+    class ReadFileFromEnd
+    {
+        private string PathToFile { get; set; }
+        private long pointer=1;
+        private long FileLength=0;
+        private bool flagTheEndFile=false;
+        
+        public ReadFileFromEnd(string path)
+        {
+            PathToFile = path;
+            using (FileStream fs = new FileStream(PathToFile, FileMode.Open, FileAccess.Read))
+            {
+                FileLength = fs.Length;
+            }
+        }
+
+        public string ReadLine()
+        {
+            if (flagTheEndFile)
+                return null;
+            return strReverse(ReadLineFromFile());
+        }
+
+        private StringBuilder ReadLineFromFile()
+        {
+            StringBuilder line = new StringBuilder();
+            using (FileStream fs = new FileStream(PathToFile, FileMode.Open, FileAccess.Read))
+            {
+
+                for (long offset=pointer; offset <= FileLength; offset++)
+                {
+                    fs.Seek(-offset, SeekOrigin.End);
+                    char symbol = (char)fs.ReadByte();
+                    if (symbol == '\n')
+                    {
+                        
+                        pointer = offset+1;
+                        break;
+                    }
+                    else 
+                    {
+                        if(!char.IsControl(symbol))
+                            line.Append(symbol);
+
+                        if(offset== FileLength)
+                        {
+                            flagTheEndFile = true;
+                        }
+                    }
+                }
+            }
+            return line;
+        }
+
+        private string strReverse(StringBuilder str)
+        {
+            string output = new string(str.ToString().ToCharArray().Reverse().ToArray());
+            return output;
+        }
+    }
+
